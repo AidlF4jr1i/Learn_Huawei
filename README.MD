@@ -15,7 +15,10 @@ hal-hal yang perlu diperhatikan ketika menginstall ENsP :"
 3. uninstall Npcap, karena untuk ENSp menggunakan WinPcap sebagai penghubung antara jaringan virtual ke jaringan Host
 ", next mengenai materi yang akan dipelajari:
 
-- Basic
+- BasicHuawei Config
+- STP & RSTP
+- Dynamic-HOST
+- Static ROuting dan Dynamic(RIP)
 
 
 di section ini akan lebih banyak berjkutat pada LABs skenario dan penjelasan-penejlasan dari ahsil pengerjaan LAbs jadi teman-teman bisa mencoba untuk mengimpor lab yang disediakan dan mencoba nya di eksostiem ENsP teman-teman!
