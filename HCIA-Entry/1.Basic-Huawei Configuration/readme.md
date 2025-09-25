@@ -144,8 +144,46 @@ menjadi:
 
 ---
 
-# Kesimpulan
+# LAB 3 – Using Telnet to remote Huawei Router using HostOS
 
-Pada lab kedua ini kita belajar bagaimana melakukan konfigurasi dasar di router Huawei, mulai dari menampilkan informasi (`display`), masuk ke mode konfigurasi (`system-view`), mengatur IP address, hostname, banner, console access, hingga manajemen waktu.
+padalab kali ini kita akan mencoba melakukan remote pada router yang ada di ensp agar bisa dikonfigurasikan dari laptop kita, hal-hal yang perlu disiapkan:
 
-Secara konsep, perintah Huawei mirip dengan Cisco, hanya berbeda di syntax. Jika terbiasa dengan Cisco, adaptasi ke Huawei cukup mudah.
+1. setting loopback adapter di HostOS, disini karena kita menggunakan windows caranya cukup simpel:
+- pada menu search windows tulis 'hdwwiz' lalu enter
+- setelah masuk, pilih next lalu 'istall hardware manually'
+- scroll lalu pilih bagian 'Network Adapter' lalu klik enter
+- scroll lagi lalu pilih 'Microsofot', nah di menu sebelah kanan cari 'Loopback adapater atau kalau di laptop namanya'micorosoft KM-TEST loopback adapater'',klik next dua kali lalu oke, setelah itu lakukan restart pada komputer dan lihat apakah adapater sudah terpasang dengan menalankan 'Win + r' lalu 'ncpa.cpl', disana harusnya akan ada aadapter baru dengan nama Micorosoft Km-TEST Loopback, ubah namanya sesuai preferensi kamu, disinisaya akan menggunakan namaa'ENSP'
+
+- setelah itu klik properties pada loopback adapter dan setting IP nya menjadi '192.168.2.254/24' laluu klik oke
+
+2. okeh sekarag  kembali ke ENSp disini topologinya akan seperti pada gambar berikut: 'https://drive.google.com/file/d/15vaVup7X29Cu5nSvB2UHmKef4aZuJdlS/view?usp=drive_link'. disini kita akan menggunakan node 'cloud' dan 1 router AR1220 yang aan kita coba remote, sebelum itu kita lakukan settingterlebiih dahulu pada cloud dengan klik kanan lalu 'settings', nah di menu yang tampil lakukan setting seperti pada gambar berikut :
+
+-gambar 1: https://drive.google.com/file/d/1ib7YetBnPaxxRz_iKs5XRRJ8OOgHHIo9/view?usp=drive_link
+-gambar2: https://drive.google.com/file/d/18RXsPfTwV9lkr3R5GjMcVcJuaUccPU5A/view?usp=drive_link
+-gambar3: https://drive.google.com/file/d/1uj4W9JDeoJbombzDEW1-7gGxW_UdXOlQ/view?usp=drive_link
+, next setelah selesai padanode cloud pada ROuter masuk ke manu CLI dan mode konfig dengan menjalanakn:
+- system-view, lalu masukkan IP address dengan subnet yang sama seperti pada komputer host
+- interface Gigabitethernet 0/0/0
+- ip add 192.168.2.1 24
+- ping 192.168.2.254, kalau ping nya jalan artinya antar router dan PC sudah sa;ing terhubung(gambar:'https://drive.google.com/file/d/1Z62ljt7dfhq6gG5tqaJAlrwWeeJr1FIT/view?usp=drive_link'), next kita akan konfigurasikan telnet agar router huawei dapat kita remote dari komputer host kita, disini di mmode system-view kita akan jalankan :
+
+- quit, keluar dari interface 
+- user-interface vty 0 4, command vty ini berarti kita akan membuat sebuah room dimana orang-orang yang terhubung ke jaringan router dapat meremote router dengan maximal '0-4' atau kalau dijumlahkan sebanyak 5 user yang bisa berada pada sesi yang sama, kalau ada user ke-6 yang mecncoba remote maka aksesnya akan ditolak
+- authentication-mode password , mesetting password untuk user yg akan mremote
+- masukkan password, bebas mau masukkan apa saja, klik enter lalu selesai
+
+3. selanutnya, pastika aps 'Putty' sudah terinstall di laptop kalian,KALAU BELUM SILAHKAN DWPWNLOAD DAN INSTALL FILE NYA DI SINI :'https://drive.google.com/file/d/11H4X2Xjvrn9Zc7bUmD35fj-bEe9Zc6tF/view?usp=drive_link', diisni kita akan meremote router ,enggunakan putty:
+- masuk ke putty lalu masukka '192.168.2.1'(ip router) lalu centang menu 'telnet',gambar:'https://drive.google.com/file/d/17tqPixNrq1NxfdmCEJvtEExzvT9ECce7/view?usp=drive_link'
+- klik enter dan masukkan passwrod yang sudah kita setting sebelumnya dan boom kita berhasil melakukan remote!, untuk memastikan coba jalankan command 'disp ip int br' dan lihat apakah kita bisa melihat konfigirasi yang ada di router, gambar: 'https://drive.google.com/file/d/1gssNewk2IHQYirb9YjLrriXX8RoRYU0Z/view?usp=drive_link'
+- disini kita mendapat error unrecognized erro, mengapa? hal ini dikarenakan kita lupa melakukan setting hak akses apada user telent sehingga hak yang diapat sekarang hanya pada level 'visit' disini kita bbahakan tdak bisa menjalankan command 'display', solusi untuk amslaah ini, kita masuk ke interface vty :
+- system-view
+- user-interface vty 0 4
+- user privilege level 15, dimana level 15 adalah level akses tertinggi yakni kita bisa mengkonfig router dengan hak akses admin!
+- next coba remote ulang dan jalankan perintah sebelumnya
+- tampilan akhirnya akan seperti gambar: 'https://drive.google.com/file/d/1Jc0Pp02zi8RQte767RwsuDey3FHrYRpk/view?usp=drive_link'
+
+
+okeh sampai section ini kita sudah banyak melakukan beberapa hal mulai dari pengenalan jaringankomptuter di ENSp command-command basic pada HuaweiRouter, sampai acara meremote router Huawei ke komputer OS, jaga semangatmu karena kita akan amskuk kemateri yang lebih berat!!
+
+
+# Ringkasan Materi
