@@ -10,7 +10,8 @@ jika Anda sudah terbiasa dengan konsep dasarnya.
 
 Pada tutorial ini, kita akan melakukan konfigurasi DHCP Server menggunakan topologi laboratorium berikut:
 
-- **Topologi:** Lihat Topologi Jaringan  
+- **Topologi:** Lihat Topologi Jaringan
+🔗 [Topologi DHCP Server](https://drive.google.com/open?id=1h-l-IMjnWDCuHKgzsmdEHta7FyVRbmuH&usp=drive_fs)  
 
 Berdasarkan topologi tersebut, kita akan mengkonfigurasi R2 sebagai DHCP Server.
 
@@ -34,7 +35,6 @@ Konfigurasikan interface yang terhubung ke switch (SW). Interface ini akan berti
 [Huawei-GigabitEthernet0/0/0] dhcp select interface
 ```
 
-🔗 [Topologi DHCP Server](https://drive.google.com/open?id=1h-l-IMjnWDCuHKgzsmdEHta7FyVRbmuH&usp=drive_fs)
 
 #### Langkah 2.3: Konfigurasi Opsi DHCP Server
 Beberapa opsi yang dapat digunakan:
@@ -65,6 +65,7 @@ Ubah pengaturan IP dari **Static** menjadi **DHCP**.
 
 🔗 [Setting PC](https://drive.google.com/open?id=15cQj9jj-vkh9AKft--nuJYi8Rw1g6dN-&usp=drive_fs)  
 🔗 [output PC](https://drive.google.com/open?id=1R1vo2lbZmgPZSlLCDAO6eoHpVdbkrb_L&usp=drive_fs)
+
 ---
 
 ### 4. Verifikasi Konfigurasi
