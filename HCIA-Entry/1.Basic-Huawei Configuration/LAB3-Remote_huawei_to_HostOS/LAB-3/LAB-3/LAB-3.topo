@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UNICODE" ?>
+<topo version="1.3.00.200T">
+    <devices>
+        <dev id="48EBB8B6-7779-4e2b-AE71-813C05E7B658" name="AR2" poe="0" model="AR1220" settings="" system_mac="00-E0-FC-D1-04-74" com_port="2000" bootmode="0" cx="234.000000" cy="124.000000" edit_left="261" edit_top="178">
+            <slot number="slot17" isMainBoard="1">
+                <interface sztype="Ethernet" interfacename="GE" count="2" />
+                <interface sztype="Ethernet" interfacename="Ethernet" count="8" />
+            </slot>
+        </dev>
+        <dev id="D61047B8-8A05-419d-94FD-58663F7BD5B5" name="Laptop" poe="0" model="Cloud" settings="" system_mac="" com_port="0" bootmode="0" cx="220.500000" cy="307.500000" edit_left="263" edit_top="392">
+            <slot number="slot17" isMainBoard="1">
+                <interface sztype="Ethernet" interfacename="Ethernet" count="0" />
+                <interface sztype="Ethernet" interfacename="GE" count="0" />
+                <interface sztype="Serial" interfacename="Serial" count="0" />
+                <interfaceMap sztype="Ethernet" interfacename="GE" displayNo="1" remoteDisplayNo="2" adapterUid="\Device\NPF_{30F97227-3DFC-4526-A47F-23A3CD4C450F}" isOpen="1" udpPort="0" peerIPAdd="0.0.0.0" peerIP="0" peerPort="0" />
+                <interfaceMap sztype="Ethernet" interfacename="GE" displayNo="2" remoteDisplayNo="1" adapterUid="" isOpen="0" udpPort="0" peerIPAdd="0.0.0.0" peerIP="0" peerPort="0" />
+            </slot>
+        </dev>
+    </devices>
+    <lines>
+        <line srcDeviceID="D61047B8-8A05-419d-94FD-58663F7BD5B5" destDeviceID="48EBB8B6-7779-4e2b-AE71-813C05E7B658">
+            <interfacePair lineName="Copper" srcIndex="1" srcBoundRectIsMoved="0" srcBoundRect_X="262.352814" srcBoundRect_Y="285.606293" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="0" tarBoundRect_X="261.433990" tarBoundRect_Y="194.181580" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
+        </line>
+    </lines>
+    <shapes />
+    <txttips />
+</topo>
