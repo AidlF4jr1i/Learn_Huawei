@@ -111,7 +111,7 @@ Total waktu konvergensi: **30-50 detik**.
 **Intro singkat:** RSTP (IEEE 802.1w) adalah evolusi STP yang dirancang untuk mengurangi waktu konvergensi secara drastis. Pada perangkat Huawei, RSTP adalah salah satu mode STP yang tersedia (selain STP klasik dan MSTP). RSTP cocok untuk jaringan modern yang memerlukan pemulihan cepat ketika terjadi perubahan topologi.
 
 **Topologi LAB RSTP:** gunakan file topologi berikut:  
-[Topology](https://drive.google.com/open?id=10ZSAUGV5T7l8_NAjWg2iyAXxhBHRQl0x&usp=drive_fs)
+[Topology](https://drive.google.com/open?id=1N5ImD0b-qh8o7nfWYpQMXYNQsK5Wn3I2&usp=drive_fs)
 
 ### Langkah awal — verifikasi STP/RSTP aktif dan pemilihan root
 Sebelum perubahan, cek mode dan status STP/RSTP:
