@@ -108,75 +108,189 @@ Total waktu konvergensi: **30-50 detik**.
 
 # LAB 5 RSTP
 
-RSTP merupakan salah satu dari 3 protokol STP yang ada di Huawei, bedanya dengan STP, RSTP menawarkan proses yang jauh lebih cepat bila terjadi skenario jaringan putus dimana di STP kita harus menunggu selama 50 detik maka RSTP akan memproses lebih cepat dari itu, untuk LAB RSTP kita akan menggunakan Topologi berikut: 'https://drive.google.com/open?id=1N5ImD0b-qh8o7nfWYpQMXYNQsK5Wn3I2&usp=drive_fs'
+**Intro singkat:** RSTP (IEEE 802.1w) adalah evolusi STP yang dirancang untuk mengurangi waktu konvergensi secara drastis. Pada perangkat Huawei, RSTP adalah salah satu mode STP yang tersedia (selain STP klasik dan MSTP). RSTP cocok untuk jaringan modern yang memerlukan pemulihan cepat ketika terjadi perubahan topologi.
 
-pada LAB ini seperti biasa kita akan melakukan cek dahulu stp nya dan melihat switch mana yang menjadi root bridge, hali ini ditunjukkan bila kita menggunakan 'disp stp' dan mac address pada menu CIST brdige  CIST root, dan CIST RegRoot sama, dan bila menggunakan 'disp stp br' maka seluruh port nya dalah Designated port! next kita akan menjalankan command untuk masing-masing switch :
+**Topologi LAB RSTP:** gunakan file topologi berikut:  
+`https://drive.google.com/open?id=1N5ImD0b-qh8o7nfWYpQMXYNQsK5Wn3I2&usp=drive_fs`
 
-- stp mode rstp
+### Langkah awal — verifikasi STP/RSTP aktif dan pemilihan root
+Sebelum perubahan, cek mode dan status STP/RSTP:
 
-, next kita akan melakukan beberapa penyesuaian:
+```bash
+# Periksa mode dan informasi CIST/Root
+display stp
+display stp brief    # atau disp stp br pada beberapa platform
+```
 
-- kita akan mensetting mode edge-port enable untuk setiap interface yang mengarah ke PC dari Switch, mengapa? hal ini untuk menyatakan pada Switch bahwa PC tidak termasuk dalam bagian Topologi secara keseluruhan dan hanya bertugas sebagai end-device saja, kalau kita tidak mengkonfigurasi nya maka interface yang mengarah ke PC(terkhusus untuk Switch non root bridge) akan diklasifikasikan sebagai root port padahal harusnya tidak, hal ini akan menyebabkan masalah dimana ketika ada peruahan jaringan pada salah satu switch PC akan ikut dalam  proses discarding --> learning --> forwarding yang mana akan membuat galat jaringan selama 1 menit yang harusnya tidak dirasakan
+Perhatikan informasi pada menu CIST Bridge / CIST Root / CIST Regional Root (CIST RegRoot). Jika `disp stp br` menunjukkan seluruh port sebagai **Designated (DESI)**, itu berarti switch tersebut berperan sebagai Root Bridge untuk CIST/MST.
 
-- next kita akan mengkonfigurasi BPDU juga di interface yang sama, so apa itu BPDU?, BPDU(Bridge Protocol Data Unit) merupakan sebuah mekanisme pengiriman "pesan" yang digunakan oleh switch untuk berkomunikasi satu sama lain dalam proses STP. Pesan ini berisi informasi untuk memilih root bridge dan mencegah looping di jaringan. nah disini kita akan mensetting agar di jaringan end-device tidak menerima pesan BPDU apapun(walaupun sebenarnya memank tidak karena hanya dilakukan oleh switch), ini untuk meminimalisir bila mana dikemudian hari di interface yang tersambung PC tiba-tiba berganti menjadi Switch, apa yang terjadi? switch baru akan mengirimkan BPDU ke switch lain dan akan merubah keseluruhan topologi yang tentunya akan menjadi kekacauan apalagi kalau sw varu tsbt menjadi root bridge whuuhh 'mengerikann', okeh so next kita akan menjalankan :
+### Mengaktifkan mode RSTP
+Jalankan pada setiap switch:
 
-- system-view
-- int <nama interface>
-- stp edge-port enabled
-- quit
-- stp bpdu-protection
+```bash
+[Huawei] system-view
+[Huawei] stp mode rstp
+```
 
-di kedua switch, nantinya pada interface stp di masing-masing swicth akan menjadi:
+Verifikasi kembali dengan `display stp brief` untuk melihat peran port setelah mode berubah.
 
-- Switch Root bridge:
-[Huawei]disp stp br
- MSTID  Port                        Role  STP State     Protection
-   0    GigabitEthernet0/0/1        DESI  FORWARDING      BPDU
-   0    GigabitEthernet0/0/2        DESI  FORWARDING      NONE
-   0    GigabitEthernet0/0/3        DESI  FORWARDING      NONE
+---
 
-- Switch Root PortL
-[Huawei]disp stp br
- MSTID  Port                        Role  STP State     Protection
-   0    GigabitEthernet0/0/1        DESI  FORWARDING      BPDU
-   0    GigabitEthernet0/0/2        ROOT  FORWARDING      NONE
-   0    GigabitEthernet0/0/3        ALTE  DISCARDING      NONE
+### Penyesuaian penting untuk lingkungan dengan end‑device (PC)
+Pada lab ini kita akan melakukan beberapa penyesuaian agar end‑device (PC) tidak mempengaruhi topologi STP/RSTP:
 
-okeh, setelah ini, langkah terakhir adalah menjalankan command loop protection untuk alternate port dan juga root port, loh buat apa?, jadi gini bayangin ada skenario dimana SW B(non root bridge) di bagian alternate port nya tidak tiba-tiba tdak menerima BPDU apa yang terjadi?, yang terjadi adalah SW B akan menganggap bahwa alternate port tidak terhubung lagi ke Switch tetangganya(root bridge) sehingga akan mengembalikan statusnya menjadi 'forwarding' akibatnya skenario looping akan kembali terjadi, nah lalu skenario ke-2 dimana giliran root port yang tiba-tiba tidak menerima BPDU dari SW tetangga(root bridge) maka yang terjadi justru lebih parah yakni SW B akan 'mendeklarasikan' diirnya sebagai root bridge yang baru dan mengirimkan semua BPDU dari seluruh port yang tehrubung sehingga akan ada 2 SW yang menjadi Root bridge dimana sudah pasti ini akan menyebabkan proses looping juga karena tidak seharsunya ada 2 Root bridge dalam satu jaringan!, cara mengkonfigurasi loop protection juga cukup mudah, kita cukup jalankan :
+#### 1. Konfigurasi Edge Port (stp edge-port)
+Mengapa perlu? Port yang terhubung ke end‑device (PC, server) **tidak** termasuk dalam topologi redundansi — mereka seharusnya tidak ikut dalam pemilihan Root Port atau proses discarding/learning yang memperlambat konektivitas ketika terjadi perubahan topologi. Jika tidak dikonfigurasi, interface ke PC (terutama pada switch non‑root) bisa salah dikategorikan sebagai Root Port sehingga menjadi bagian dari proses konvergensi dan menyebabkan gangguan pada end‑device selama perubahan topologi.
 
-- int <interface root port/alternate>
-- stp loop-protection
+**Perintah:**
 
-dan hasilnya akan seperti ini : '
-[Huawei]disp stp br
- MSTID  Port                        Role  STP State     Protection
-   0    GigabitEthernet0/0/1        DESI  FORWARDING      BPDU
-   0    GigabitEthernet0/0/2        ROOT  FORWARDING      NONE
-   0    GigabitEthernet0/0/3        ALTE  DISCARDING      NONE
-', okeh next kebagian paling penting adalah perbandingan antara STP dan juga RSTP, sebelumnya saya bilang bahwa STP lebih lambat dari RSTP tapi saya belum menunjukkan buktinya, disini kita akan menjalankan skenario dimana pada LAB STP & RSTP kita akan menjalankan ping endless dari PC1 ke PC2 lalu  mematikan root port pada switch dan lihat berapa lama RTO terjadi sampai jaringan kembali bisa terjalin. singkatnya ini dia hasilnya:
+```bash
+[SW] system-view
+[SW] interface <nama-interface>    # mis. GigabitEthernet0/0/1
+[SW-GigabitEthernet0/0/1] stp edge-port enable
+[SW-GigabitEthernet0/0/1] quit
+```
 
-- STP:"
+Ulangi untuk setiap interface yang mengarah ke PC.
 
+#### 2. Aktifkan BPDU Protection (stp bpdu-protection)
+**Apa itu BPDU?** BPDU (Bridge Protocol Data Unit) adalah pesan yang dipertukarkan switch untuk membentuk topologi STP: informasi root, cost, dan lain‑lain. Kita ingin mencegah end‑device (atau perangkat yang salah) mengirim/menyebabkan BPDU masuk ke jaringan dan mengubah topologi secara tidak sengaja (misal: seseorang mencolokkan switch baru pada port PC).
+
+Dengan mengaktifkan `stp bpdu-protection` secara global setelah edge port dikonfigurasi, apabila port edge menerima BPDU, port tersebut dapat dijadikan `error-down` atau dimatikan untuk mencegah perubahan topologi yang tidak diinginkan.
+
+**Perintah:**
+
+```bash
+[SW] system-view
+[SW] stp bpdu-protection
+```
+
+Pada tampilan `display stp` atau `display stp brief` Anda akan melihat kolom `Protection` menandakan `BPDU` pada port yang dilindungi.
+
+**Contoh hasil verifikasi:**
+
+- *Switch Root Bridge output (`disp stp br`)*
+```
+ MSTID  Port                    Role  STP State     Protection
+   0    GigabitEthernet0/0/1    DESI  FORWARDING    BPDU
+   0    GigabitEthernet0/0/2    DESI  FORWARDING    NONE
+   0    GigabitEthernet0/0/3    DESI  FORWARDING    NONE
+```
+
+- *Switch Non‑Root Bridge output (`disp stp br`)*
+```
+ MSTID  Port                    Role  STP State     Protection
+   0    GigabitEthernet0/0/1    DESI  FORWARDING    BPDU
+   0    GigabitEthernet0/0/2    ROOT  FORWARDING    NONE
+   0    GigabitEthernet0/0/3    ALTE  DISCARDING    NONE
+```
+
+---
+
+### Loop Protection (stp loop-protection)
+**Kenapa diperlukan?** Bayangkan 2 skenario masalah BPDU:
+
+1. **Alternate port** tiba‑tiba berhenti menerima BPDU dari tetangga (mis. link unidirectional). Jika tidak ada proteksi, port ini bisa menganggap link putus dan beralih ke `FORWARDING` — yang dapat menyebabkan looping.  
+2. **Root port** tiba‑tiba berhenti menerima BPDU. Switch non‑root bisa mengira dirinya terputus dari root, lalu mencoba menjadi Root Bridge baru, sehingga ada dua Root Bridge di jaringan — jelas ini menyebabkan kekacauan dan loop.
+
+`stp loop-protection` mencegah kedua skenario di atas dengan membuat port tetap dalam status `DISCARDING` (atau minimal tidak langsung menjadi `DESIGNATED`) saat BPDU hilang sehingga loop tidak terjadi.
+
+**Konfigurasi:**
+
+```bash
+[SW] system-view
+[SW] interface <interface-root-or-alternate>
+[SW-if] stp loop-protection
+```
+
+**Contoh verifikasi (`disp stp br`):**
+
+```
+ MSTID  Port                    Role  STP State     Protection
+   0    GigabitEthernet0/0/1    DESI  FORWARDING    BPDU
+   0    GigabitEthernet0/0/2    ROOT  FORWARDING    NONE
+   0    GigabitEthernet0/0/3    ALTE  DISCARDING    NONE
+```
+
+---
+
+### Perbandingan Kecepatan Konvergensi: STP vs RSTP (uji ping)
+Untuk membuktikan klaim RSTP yang lebih cepat, lakukan pengujian real‑time dengan:
+
+1. Jalankan `ping` terus‑menerus (endless ping) dari PC1 → PC2.  
+2. Matikan interface yang berfungsi sebagai **Root Port** pada switch non‑root dan amati jumlah RTO / packet loss.
+
+**Hasil contoh pengujian:**
+
+- **STP**
+```
 Ping statistics for 192.168.2.253:
-    Packets: Sent = 25, Received = 20, Lost = 5 (20% loss),
+    Packets: Sent = 25, Received = 20, Lost = 5 (20% loss)
 Approximate round trip times in milli-seconds:
     Minimum = 94ms, Maximum = 2201ms, Average = 220ms
-",
+```
 
-- RSTP:"
+- **RSTP**
+```
 --- 192.168.2.253 ping statistics ---
   69 packet(s) transmitted
   69 packet(s) received
   0.00% packet loss
   round-trip min/avg/max = 47/80/437 ms
-", lihat RSTP terbukti lebih cepat dalam menanani perubahan jaringan dibuktikan dengan tidak adanya RTO yang terjadi kalaupun ada maka itu akan terjadi di 1-2 RTO saja berbeda dengan STP
+```
+
+**Interpretasi:** RSTP menunjukkan hampir tidak ada packet loss (0% pada contoh), atau paling banyak 1–2 RTO singkat. Sementara STP klasik menunjukkan packet loss yang signifikan (contoh: 20%), menggambarkan konvergensi lambat (puluhan detik). Ini membuktikan bahwa RSTP memulihkan jalur alternatif jauh lebih cepat.
+
+---
 
 ## Ringkasan RSTP
-<masukkan ringkasan disini>
+- **Standar:** IEEE 802.1w.  
+- **Waktu konvergensi:** Sangat cepat (beberapa detik atau kurang).  
+- **Peran port:** Root, Designated, Alternate, Backup (lebih tegas dibanding STP).  
+- **Fitur penting:** Edge Port (`stp edge-port enable`), BPDU Protection (`stp bpdu-protection`), Loop Protection (`stp loop-protection`).  
+- **Keunggulan:** Meminimalkan packet loss saat terjadi perubahan topologi; ideal untuk jaringan yang membutuhkan ketersediaan tinggi.  
+- **Rekomendasi konfigurasi di lab/produksi:**  
+  - Aktifkan `stp mode rstp` pada semua switch.  
+  - Tandai port end‑device sebagai `edge-port` untuk mencegah dampak konvergensi pada end‑device.  
+  - Aktifkan `stp bpdu-protection` setelah edge‑port dikonfigurasi.  
+  - Aktifkan `stp loop-protection` pada Root/Alternate port yang rentan.  
 
-### Bonus
+---
 
-setelah membahas mengenai STP dan RSTP, lalu bagaiamna dengan MSTP?
-<bantu jelaskan secara detail dan ringkas disini>
+## Bonus: Mengenal MSTP (Multiple Spanning Tree Protocol)
+**Apa itu MSTP?** MSTP (IEEE 802.1s) adalah pengembangan dari RSTP yang memungkinkan administrator membuat beberapa *instance* Spanning Tree di dalam satu jaringan fisik. Tiap *instance* (atau MST instance) dapat memiliki topologi sendiri dan Root Bridge sendiri — sehingga cocok untuk lingkungan multi‑VLAN.
 
-# Ringkasan Materi keseluruhan
+**Masalah yang diselesaikan MSTP:**  
+- STP/RSTP hanya menyediakan **satu** topologi Spanning Tree untuk seluruh jaringan (semua VLAN berbagi topologi yang sama). Akibatnya beberapa link bisa tidak terpakai untuk VLAN tertentu dan tidak ada load‑balancing.  
+- MSTP memungkinkan beberapa topologi paralel: VLAN dikelompokkan ke dalam beberapa instance, masing‑masing instance dapat memilih Root Bridge berbeda, sehingga link redundan dapat dimanfaatkan secara lebih efisien (load balancing per‑VLAN).
+
+**Konsep kunci:**  
+- **Region & Instance Mapping:** Administrator mendefinisikan region MST dan peta VLAN→MST instance (contoh: instance 1 = VLAN 10–20, instance 2 = VLAN 30–40).  
+- **Per‑instance Root Bridge:** Tiap instance dapat memiliki root yang berbeda.  
+- **Kinerja:** Menggabungkan kecepatan RSTP (konvergensi cepat) dan kemampuan load‑balancing berbasis VLAN. Pada perangkat Huawei, **MSTP** biasanya adalah mode default.
+
+**Contoh singkat penggunaan (konsep):**  
+- Instance 1: VLAN 10–20 → Root Bridge: SW1  
+- Instance 2: VLAN 30–40 → Root Bridge: SW2
+
+Dengan konfigurasi tersebut, traffic untuk VLAN 10–20 mengambil jalur via SW1 sedangkan VLAN 30–40 via SW2 — link yang diblokir untuk instance tertentu bisa aktif untuk instance lain sehingga memaksimalkan pemakaian bandwidth.
+
+**Catatan:** Konfigurasi MSTP memerlukan perencanaan VLAN → instance dan konsistensi konfigurasi region/instance di seluruh switch agar tidak terjadi ketidaksamaan pandangan topologi antar switch.
+
+---
+
+## Ringkasan Materi Keseluruhan
+| Protokol | Standar | Waktu Konvergensi | Status Port | Peran Port | Load Balancing | Default Huawei |
+|----------|---------|-------------------:|-------------|------------|----------------|----------------|
+| STP      | IEEE 802.1D | 30–50 detik | Blocking, Listening, Learning, Forwarding | Root, Designated, Alternate | Tidak | Tidak |
+| RSTP     | IEEE 802.1w | Beberapa detik atau kurang | Discarding, Learning, Forwarding | Root, Designated, Alternate, Backup | Tidak | Tidak |
+| MSTP     | IEEE 802.1s | Cepat (sama seperti RSTP) | Discarding, Learning, Forwarding (per instance) | Sama seperti RSTP per‑instance | Ya (per VLAN instance) | Ya |
+
+---
+
+**Catatan akhir & best practice singkat:**  
+- Untuk jaringan enterprise: gunakan **MSTP** jika ada banyak VLAN dan Anda butuh load balancing.  
+- Untuk jaringan yang menuntut pemulihan cepat tapi sederhana: **RSTP** adalah pilihan yang baik.  
+- Untuk lab pembelajaran/compatibility, pahami perbedaan masing‑masing mode dan praktikkan konfigurasi `edge‑port`, `bpdu‑protection`, dan `loop‑protection` seperti diberikan di atas.
+
+---
