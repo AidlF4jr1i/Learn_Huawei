@@ -1,119 +1,176 @@
-# DHCP
+# DHCP SERVER & RELAY
 
-DHCP merupakan salah satu menu yang dimiliki oleh Router Huawei yang berfungsi sebagai penyedia layanan IP secara otomatis kepada perangkat lain dalam satu jaringan yang sama, konsepnya mirip dengan yang ada pada beberapa vendor seperti Mikrotik,dan Cisco jadi tidak begitu sulit untuk mengkonfigurasinya, sebelum lanjut kita pada section ini kita akan menggunakan Lab Topology berikut:
+## Konfigurasi Dasar DHCP Server pada Router Huawei
 
-Topology: "https://drive.google.com/open?id=1h-l-IMjnWDCuHKgzsmdEHta7FyVRbmuH&usp=drive_fs"
+### 1. Pengenalan DHCP
+DHCP (Dynamic Host Configuration Protocol) adalah fitur pada perangkat jaringan, termasuk router Huawei, 
+yang berfungsi untuk memberikan dan mengelola alokasi alamat IP secara otomatis kepada perangkat (klien) dalam satu jaringan. 
+Konsep ini serupa dengan yang diterapkan oleh vendor lain seperti MikroTik dan Cisco, sehingga konfigurasinya tidak terlalu rumit 
+jika Anda sudah terbiasa dengan konsep dasarnya.
 
-next dari LAB tersebut kita akan mulai mengkonfigurasikan DHCP-Server berikut rincian commandnya:
+Pada tutorial ini, kita akan melakukan konfigurasi DHCP Server menggunakan topologi laboratorium berikut:
 
-- pada setiap router masuk ke 'system-view' dan jalankan 'dhcp enabled'
-- setelah itu, pada R2 yang akan saya jadikan DHCP-Server, kita akan menjalankan:
+- **Topologi:** Lihat Topologi Jaringan  
 
-    -) ip address 192.168.1.1 24 # (memasukkan IP address sebagai gateway)
-    -) int <nama interface yang terhubung ke SW>
-    -) dhcp select interface(memilih interface tersebut sebagai DHCP-Server)
-    -) next kita akan menngkonfig dhcp server, ada banyak pilihan seperti yang saya tuliskan berikut : '
-    
-    [Huawei-GigabitEthernet0/0/0]dhcp server ?
-  dns-list             Configure DNS servers
-  domain-name          Configure domain name 
-  excluded-ip-address  Mark disable IP addresses 
-  import               Imports the following network configuration parameters   
-                       from a central server into local ip pool database: domain
-                       name, dns server and netbios server.
-  lease                Configure the lease of the IP pool
-  nbns-list            Configure the windows's netbios name servers 
-  netbios-type         Netbios node type
-  next-server          The address of the server to use in the next step of the 
-                       client's bootstrap process.
-  option               Configure the DHCP options
-  option121            DHCP option 121 
-  option184            DHCP option 184
-  recycle              Recycle IP address
-  static-bind          Static bind
-    ', nah disini kita akan mengkonfigurasikan yang pertama adalah dns-list, lalu lease, dan juga excluded ip addr langsung saja ke konfigurasi:
-    -) dhcp server dns-list 8.8.8.8
-    -) dhcp server  lease day 1 hour 1 minute 30, # mengatur waktu reset ip menjadi selama 1 hari 1 jam 30 menit
-    -) dhcp server excluded-ip-address 192.168.1.2 # mengexlude IP ini agar tidak masuk kedalam andtrian IP otomatis
+Berdasarkan topologi tersebut, kita akan mengkonfigurasi R2 sebagai DHCP Server.
 
-selanjutnya pada masing-masing router kita tinggal menjalankan:
-- int <nama interface yang terhubung ke SW>
-- ip add dhcp server-alloc
+---
 
-dan jalankan 'disp ip int br' untuk melihat apakah ip address didapatkan, next di R2(DHCP-Server) kita akan pastikan juga apakah requestnya masuk atau tidak dengan menjalankan 'display dhcp server statistics ' dan output nya seperti ini : '
-[Huawei]display dhcp server statistics 
- DHCP Server Statistics: 
+### 2. Konfigurasi DHCP Server (di R2)
+Langkah-langkah berikut dilakukan pada router yang akan dijadikan sebagai server DHCP (R2).
 
- Client Request          : 8       
-  Dhcp Discover          : 4       
-  Dhcp Request           : 4       
-  Dhcp Decline           : 0       
-  Dhcp Release           : 0       
-  Dhcp Inform            : 0       
- Server Reply            : 8       
-  Dhcp Offer             : 4       
-  Dhcp Ack               : 4       
-  Dhcp Nak               : 0       
- Bad Messages            : 0   
-', terakhir pada topologi kan kita ingin agar PC bisa dhcp an juga, caranya gimana? cukup mudah, cukup pergi ke menu settings PC lalu pilihan IP dari 'ststic' ganti ke 'dhcp' berikut tampilannya
+#### Langkah 2.1: Aktifkan Layanan DHCP
+```bash
+<Huawei> system-view
+[Huawei] dhcp enable
+```
 
-Gambar:"https://drive.google.com/open?id=15cQj9jj-vkh9AKft--nuJYi8Rw1g6dN-&usp=drive_fs"
-Gambar:"https://drive.google.com/open?id=1R1vo2lbZmgPZSlLCDAO6eoHpVdbkrb_L&usp=drive_fs"
+#### Langkah 2.2: Konfigurasi Interface
+Konfigurasikan interface yang terhubung ke switch (SW). Interface ini akan bertindak sebagai gateway untuk klien.
 
-# Ringkasan DHCP-Server
+```bash
+[Huawei] interface GigabitEthernet0/0/0
+[Huawei-GigabitEthernet0/0/0] ip address 192.168.1.1 24
+[Huawei-GigabitEthernet0/0/0] dhcp select interface
+```
 
-<masukkan ringkasan penjelasan sebelumnya disini>
+🔗 [Topologi DHCP Server](https://drive.google.com/open?id=1h-l-IMjnWDCuHKgzsmdEHta7FyVRbmuH&usp=drive_fs)
+
+#### Langkah 2.3: Konfigurasi Opsi DHCP Server
+Beberapa opsi yang dapat digunakan:
+- **DNS**  
+- **Lease Time**  
+- **Excluded IP**  
+
+```bash
+[Huawei-GigabitEthernet0/0/0] dhcp server dns-list 8.8.8.8
+[Huawei-GigabitEthernet0/0/0] dhcp server lease day 1 hour 1 minute 30
+[Huawei-GigabitEthernet0/0/0] dhcp server excluded-ip-address 192.168.1.2
+```
+
+---
+
+### 3. Konfigurasi DHCP Client (Router & PC)
+
+#### Langkah 3.1: Konfigurasi Router Klien
+```bash
+<Huawei> system-view
+[Huawei] interface GigabitEthernet0/0/0
+[Huawei-GigabitEthernet0/0/0] ip address dhcp-alloc
+```
+
+#### Langkah 3.2: Konfigurasi PC Klien
+Ubah pengaturan IP dari **Static** menjadi **DHCP**.
 
 
+🔗 [Setting PC](https://drive.google.com/open?id=15cQj9jj-vkh9AKft--nuJYi8Rw1g6dN-&usp=drive_fs)  
+🔗 [output PC](https://drive.google.com/open?id=1R1vo2lbZmgPZSlLCDAO6eoHpVdbkrb_L&usp=drive_fs)
+---
 
-# LAB 7 DHCP RELAY
+### 4. Verifikasi Konfigurasi
 
-DHCP Relay adalah mekanisme pada router atau perangkat Layer-3 yang berfungsi untuk meneruskan pesan DHCP (yang aslinya broadcast) ke DHCP server yang berada di jaringan lain. Hal ini diperlukan karena broadcast tidak bisa melewati router. Misalnya ada 3 router (R1, R2, R3) yang saling terhubung, dan R1 berfungsi sebagai DHCP Server sementara client berada di jaringan R3. Agar client di R3 bisa mendapatkan IP dari R1, maka router yang menghubungkan jaringan client (R3) perlu dikonfigurasi sebagai DHCP Relay, sehingga broadcast DHCP dari client bisa diteruskan ke DHCP server di R1!, langsung saja masuk ke topologinya,
+#### Langkah 4.1: Verifikasi di Sisi Klien
+```bash
+[Huawei-Client] display ip interface brief
+```
 
-Topologi: 'https://drive.google.com/open?id=1jKS0IVoOCm1pfFFu3-JK_xdTvMVs-tTC&usp=drive_fs'
+#### Langkah 4.2: Verifikasi di Sisi Server
+```bash
+[Huawei] display dhcp server statistics
+```
 
-okeh dari topologi tersebut kita akan terlebih dahulu mengkonfiurasi IP static untuk R1 dan R2 agar saling terhubung, lalu paad R2 kita akan menyiapkan 1 IP pada interface g0/0/1 yang hanya akan aktif bila ada request dari client(maksdunya mejadi gateway dari R3) dimana :
 
-R1:
-- system-view
-- int g0/0/0
-- ip add 192.168.12.1 24
+---
 
-R2:
-- system-view
-- int g0/0/0
-- ip add 192.168.12.2 24
-- int g0/0/1
-- ip add 172.16.0.1 24
+### Ringkasan DHCP Server
+1. Aktifkan DHCP (`dhcp enable`)  
+2. Konfigurasi interface (`dhcp select interface`)  
+3. Tambahkan parameter opsional (DNS, Lease, Excluded IP)  
+4. Klien hanya perlu diset DHCP (`ip address dhcp-alloc`)  
+5. Verifikasi dengan `display` command  
 
-next sebelum lanut pada keseluruhan router jalankan :
+---
 
-- dhcp enabled
+## LAB 7: DHCP RELAY
 
-lalu di R1:
+### 1. Pengenalan DHCP Relay
+DHCP Relay adalah mekanisme untuk meneruskan pesan DHCP (broadcast) ke server DHCP di jaringan lain, 
+karena broadcast tidak bisa melewati router.
 
-- ip pool <0-999>, disini saya akan apakai 'ip pool 0'
-- network 172.16.0.0 mask 255.255.255.0 # setting IP dhcp untuk Client
-- gateway-list <ip R2 yang tehrubung ke client>, disini: 'gateway-list 172.16.0.1', # Ip gateway yang akan menreuskan packet DHCP
-- dns-list 8.8.8.8
-- lease day 3 hour 10
-- excluded-ip-address 172.16.0.254
-- quit
-- ip route-static 172.16.0.0 255.255.255.0 192.168.12.2 # dimana semua traffic yang berhubungan dengan ip 172.16.0.0(client) akan diserahkan ke R2 via IP 192.168.12.2
-- int g0/0/0
-- dhcp select global
+Contoh:  
+- **R1** sebagai DHCP Server  
+- **R3** sebagai Client  
+- **R2** sebagai DHCP Relay
 
-R2:
+🔗 [Topologi DHCP Relay](https://drive.google.com/open?id=1jKS0IVoOCm1pfFFu3-JK_xdTvMVs-tTC&usp=drive_fs)
 
-- system-view
-- int g0/0/1 # interface yang mengarah ke client
-- dhcp select relay # memilih interface ini sebagai relay
-- dhcp relay server-ip 192.168.12.1 # memasukkan informasi menegani IP server dimana akan dikirimkan request dari Client
+---
 
-okeh setelah selesai dari ini next pada r3 kita hanya perlu masuk ke interface nya dan jalankan 'ip add dhcp-alloc' dan lihat apakah ip sudah diapaatkan atau belum dengan disp ip int br hasilnya dapat dilihat dibawah:
+### 2. Konfigurasi Awal (IP Address & DHCP Enable)
 
-gambar1(R3): "https://drive.google.com/open?id=1tWa_JjthGJIpeXR7nZ_GzmsjYHGg4bBP&usp=drive_fs"
-gambar2(PC): "https://drive.google.com/open?id=1kvRZXQ3XJ8PkFpy6V52T4mWupzRy9-_-&usp=drive_fs"
+#### Langkah 2.1: Pengaturan IP Address
+**Di R1:**
+```bash
+system-view
+int g0/0/0
+ip add 192.168.12.1 24
+```
 
-# ringkasan Materi DHCP Relay
-<masukkan penjelasan mengenari materi DHCP relay yang sudah ditulis sebelumnya!>
+**Di R2:**
+```bash
+system-view
+int g0/0/0
+ip add 192.168.12.2 24
+int g0/0/1
+ip add 172.16.0.1 24
+```
+
+#### Langkah 2.2: Mengaktifkan DHCP
+```bash
+dhcp enabled
+```
+
+---
+
+### 3. Konfigurasi DHCP Server (di R1)
+```bash
+system-view
+ip pool 0
+network 172.16.0.0 mask 255.255.255.0
+gateway-list 172.16.0.1
+dns-list 8.8.8.8
+lease day 3 hour 10
+excluded-ip-address 172.16.0.254
+quit
+ip route-static 172.16.0.0 255.255.255.0 192.168.12.2
+int g0/0/0
+dhcp select global
+```
+
+---
+
+### 4. Konfigurasi DHCP Relay (di R2)
+```bash
+system-view
+int g0/0/1
+dhcp select relay
+dhcp relay server-ip 192.168.12.1
+```
+
+---
+
+### 5. Verifikasi di Sisi Client
+- **R3** dan **PC** jalankan `ip add dhcp-alloc`  
+- Cek dengan `display ip interface brief`  
+
+🔗 [Hasil di R3](https://drive.google.com/open?id=1tWa_JjthGJIpeXR7nZ_GzmsjYHGg4bBP&usp=drive_fs)  
+🔗 [Hasil di PC](https://drive.google.com/open?id=1kvRZXQ3XJ8PkFpy6V52T4mWupzRy9-_-&usp=drive_fs)
+
+---
+
+### Ringkasan DHCP Relay
+- **R1 (Server):** Menyediakan IP pool untuk jaringan client + route-static  
+- **R2 (Relay):** Interface client diset `dhcp select relay` dan diarahkan ke `dhcp relay server-ip`  
+- **Client:** Hanya perlu set `dhcp-alloc` seperti biasa  
+
+---
