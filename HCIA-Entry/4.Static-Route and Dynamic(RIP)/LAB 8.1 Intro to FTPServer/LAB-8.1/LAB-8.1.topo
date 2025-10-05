@@ -1,7 +1,38 @@
 <?xml version="1.0" encoding="UNICODE" ?>
 <topo version="1.3.00.200T">
-    <devices />
-    <lines />
+    <devices>
+        <dev id="3DE8505D-E3F9-417d-BE8F-34B939361140" name="AR1" poe="0" model="AR1220" settings="" system_mac="00-E0-FC-87-09-91" com_port="2000" bootmode="0" cx="189.000000" cy="118.000000" edit_left="216" edit_top="172">
+            <slot number="slot17" isMainBoard="1">
+                <interface sztype="Ethernet" interfacename="GE" count="2" />
+                <interface sztype="Ethernet" interfacename="Ethernet" count="8" />
+            </slot>
+        </dev>
+        <dev id="7A5B96A8-849E-4e6b-803F-E5155BAC0418" name="AR2" poe="0" model="AR1220" settings="" system_mac="00-E0-FC-74-37-ED" com_port="2001" bootmode="0" cx="438.000000" cy="116.000000" edit_left="465" edit_top="170">
+            <slot number="slot17" isMainBoard="1">
+                <interface sztype="Ethernet" interfacename="GE" count="2" />
+                <interface sztype="Ethernet" interfacename="Ethernet" count="8" />
+            </slot>
+        </dev>
+        <dev id="6E2F3310-C736-435b-B979-3A2FE5157C48" name="LAPTOP-HOST" poe="0" model="Cloud" settings="" system_mac="" com_port="0" bootmode="0" cx="195.500000" cy="202.500000" edit_left="238" edit_top="287">
+            <slot number="slot17" isMainBoard="1">
+                <interface sztype="Ethernet" interfacename="Ethernet" count="0" />
+                <interface sztype="Ethernet" interfacename="GE" count="2" />
+                <interface sztype="Serial" interfacename="Serial" count="0" />
+                <interfaceMap sztype="Ethernet" interfacename="GE" displayNo="1" remoteDisplayNo="2" adapterUid="\Device\NPF_{30F97227-3DFC-4526-A47F-23A3CD4C450F}" isOpen="1" udpPort="0" peerIPAdd="0.0.0.0" peerIP="0" peerPort="0" />
+                <interfaceMap sztype="Ethernet" interfacename="GE" displayNo="2" remoteDisplayNo="1" adapterUid="" isOpen="0" udpPort="0" peerIPAdd="0.0.0.0" peerIP="0" peerPort="0" />
+            </slot>
+        </dev>
+    </devices>
+    <lines>
+        <line srcDeviceID="3DE8505D-E3F9-417d-BE8F-34B939361140" destDeviceID="7A5B96A8-849E-4e6b-803F-E5155BAC0418">
+            <interfacePair lineName="Copper" srcIndex="0" srcBoundRectIsMoved="0" srcBoundRect_X="259.182373" srcBoundRect_Y="144.653152" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="0" tarBoundRect_X="421.817627" tarBoundRect_Y="143.346848" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
+        </line>
+    </lines>
     <shapes />
-    <txttips />
+    <txttips>
+        <txttip left="285" top="103" right="395" bottom="120" content="192.168.1.0/24" fontname="Consolas" fontstyle="0" editsize="100" txtcolor="-16777216" txtbkcolor="-7278960" charset="1" />
+        <txttip left="242" top="120" right="261" bottom="137" content=".1" fontname="Consolas" fontstyle="0" editsize="100" txtcolor="-16777216" txtbkcolor="-7278960" charset="1" />
+        <txttip left="414" top="121" right="433" bottom="138" content=".2" fontname="Consolas" fontstyle="0" editsize="100" txtcolor="-16777216" txtbkcolor="-7278960" charset="1" />
+        <txttip left="424" top="97" right="503" bottom="114" content="FTP-SERVER" fontname="Consolas" fontstyle="0" editsize="100" txtcolor="-16777216" txtbkcolor="-7278960" charset="1" />
+    </txttips>
 </topo>
